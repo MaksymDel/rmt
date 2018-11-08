@@ -14,3 +14,4 @@ class TestLatentAlignmentDatasetReader(AllenNlpTestCase):
         assert len(dataset) == 2
         assert type(dataset[0].fields["encoded_src"].array) == type(dataset[0].fields["encoded_tgt"].array) == numpy.ndarray
         assert dataset[0].fields["encoded_src"].array.shape[0] == len(dataset[0].fields["src_strings"].metadata)
+        

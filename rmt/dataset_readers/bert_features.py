@@ -14,7 +14,7 @@ class BertFeaturesDatasetReader(DatasetReader):
         super().__init__(lazy)
     
     @overrides
-    def _read(self, file_path: str = None):
+    def _read(self, file_path: str):
         src_feat_file = file_path + "src.jsonl"
         tgt_feat_file = file_path + "tgt.jsonl"
 
@@ -23,12 +23,17 @@ class BertFeaturesDatasetReader(DatasetReader):
 
         assert len(src_sentences) == len(tgt_sentences)
 
-        for i in range(len(src_sentences)):
-            src = src_sentences[i]
-            tgt = tgt_sentences[i]
-            encoded_src = src_encoded_sentences[i]
-            encoded_tgt = tgt_encoded_sentences[i]
+        # for i, _ in enumerate(src_sentences):
+        #     src = src_sentences[i]
+        #     tgt = tgt_sentences[i]
+        #     encoded_src = src_encoded_sentences[i]
+        #     encoded_tgt = tgt_encoded_sentences[i]
+        #     yield self.text_to_instance(encoded_src, encoded_tgt, src, tgt)
+
+        for src, tgt, encoded_src, encoded_tgt in zip(src_sentences, tgt_sentences,
+                                                      src_encoded_sentences, tgt_encoded_sentences):
             yield self.text_to_instance(encoded_src, encoded_tgt, src, tgt)
+
 
     def _parse(self, file):
         sentences = []      
