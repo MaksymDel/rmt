@@ -9,9 +9,9 @@ class TestLatentAlignmentDatasetReader(AllenNlpTestCase):
     def test_reader_can_read(self):
         params = {'lazy': False}
         reader = BertFeaturesDatasetReader.from_params(Params(params))
-        dataset = reader.read("fixtures/")
+        dataset = reader.read("fixtures/data/")
 
         assert len(dataset) == 2
         assert type(dataset[0].fields["encoded_src"].array) == type(dataset[0].fields["encoded_tgt"].array) == numpy.ndarray
         assert dataset[0].fields["encoded_src"].array.shape[0] == len(dataset[0].fields["src_strings"].metadata)
-        
+

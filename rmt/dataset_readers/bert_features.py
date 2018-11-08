@@ -8,6 +8,7 @@ import jsonlines
 from typing import List, Dict
 import numpy
 
+@DatasetReader.register("bert_features")
 class BertFeaturesDatasetReader(DatasetReader):
     def __init__(self,
                 lazy: bool = False) -> None:

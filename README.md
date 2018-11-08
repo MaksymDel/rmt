@@ -1,4 +1,4 @@
-# Repository for Research in Regressional NMT by Mapping Pretrained Latent Spaces
+# Repository for Research in Regressional NMT by Mapping Pretrained Semantic Spaces
 
 ```
 0) create new conda env

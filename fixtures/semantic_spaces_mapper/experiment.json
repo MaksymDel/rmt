@@ -1,0 +1,40 @@
+{
+    "dataset_reader": {
+      "type": "bert_features"
+    },
+    "train_data_path": "fixtures/data/",
+    "validation_data_path": "fixtures/data/",
+    "model": {
+      "type": "semantic_spaces_mapper",
+    //   "mapping_layer": {
+    //       "type": "time_distributed_ff",
+    //       "feed_forward": {
+    //         "input_dim": 768,
+    //         "num_layers": 2,
+    //         "hidden_dims": [768, 768],
+    //         "activations": ["relu", "linear"],
+    //         "dropout": [0.1, 0.0]
+    //       }
+    //   }
+    "mapping_layer": {
+        "type": "gru",
+        "bidirectional": true,
+        "hidden_size": 768 / 2,
+        "input_size": 768,
+        "num_layers": 1
+      }
+    },
+    "iterator": {
+      "type": "basic",
+      "batch_size" : 2
+    },
+    "trainer": {
+      "num_epochs": 2,
+      "patience": 10,
+      "cuda_device": -1,
+      "optimizer": {
+        "type": "sgd",
+        "lr": 0.01
+      }
+    }
+  }
