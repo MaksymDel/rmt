@@ -21,3 +21,7 @@ __pycache__
 
 output/
 data/
+
+
+# bert
+bert/
