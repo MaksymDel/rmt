@@ -1,11 +1,12 @@
 {
     "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
+    "python.linting.enabled": false,
     "python.unitTest.pyTestArgs": [
         "tests"
     ],
     "python.unitTest.unittestEnabled": false,
     "python.unitTest.nosetestsEnabled": false,
     "python.unitTest.pyTestEnabled": true,
-    "python.pythonPath": "/home/maksym/anaconda3/envs/rmt/bin/python"
+    "python.pythonPath": "/home/maksym/anaconda3/envs/rmt/bin/python",
+    "python.linting.mypyEnabled": true
 }

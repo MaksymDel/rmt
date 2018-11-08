@@ -1,1 +1,2 @@
 from rmt.modules.time_distributed_ffn import TimeDistributedFeedForwardEncoder
+from rmt.modules.att_rnn_decoder import AttentionalRnnDecoder

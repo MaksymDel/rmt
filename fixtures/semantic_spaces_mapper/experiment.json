@@ -16,14 +16,32 @@
     //         "dropout": [0.1, 0.0]
     //       }
     //   }
-    "mapping_layer": {
-        "type": "gru",
-        "bidirectional": true,
-        "hidden_size": 768 / 2,
-        "input_size": 768,
-        "num_layers": 1
+    // "mapping_layer": {
+    //     "type": "gru",
+    //     "bidirectional": true,
+    //     "hidden_size": 768 / 2,
+    //     "input_size": 768,
+    //     "num_layers": 1
+    //   }
+    // },
+      "mapping_layer": {
+        "type": "att_rnn2rnn",
+        "encoder": {
+          "type": "lstm",
+          "input_size": 768,
+          "hidden_size": 768 / 2,
+          "num_layers": 1,
+          "bidirectional": true
+        },
+        "max_decoding_steps": 20,
+        "target_embedding_dim": 768,
+        "attention": {
+          "type": "dot_product"
+        },
+        "scheduled_sampling_ratio": 0
       }
     },
+    
     "iterator": {
       "type": "basic",
       "batch_size" : 2

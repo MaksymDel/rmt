@@ -65,7 +65,7 @@ class BertFeaturesDatasetReader(DatasetReader):
         fields: Dict[str, Field] = {}
         
         fields["encoded_src"] = ArrayField(array=encoded_src)
-        fields["encoded_tgt"] = ArrayField(array=encoded_tgt)
         fields["src_strings"] = MetadataField(metadata=src)
+        fields["encoded_tgt"] = ArrayField(array=encoded_tgt)
         fields["tgt_strings"] = MetadataField(metadata=tgt)
         return Instance(fields)
