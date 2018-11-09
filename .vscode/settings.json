@@ -7,5 +7,7 @@
     "python.unitTest.nosetestsEnabled": false,
     "python.unitTest.pyTestEnabled": true,
     "python.pythonPath": "/home/maksym/anaconda3/envs/rmt/bin/python",
-    "python.linting.mypyEnabled": true
+    "python.linting.mypyEnabled": true,
+    "python.linting.lintOnSave": false,
+    "python.linting.maxNumberOfProblems": 5
 }

@@ -8,7 +8,7 @@ from allennlp.data import Vocabulary
 from allennlp.models.model import Model
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
 from allennlp.nn import util
-from allennlp.modules import TimeDistributed, Seq2SeqEncoder
+from allennlp.modules import Seq2SeqEncoder
 from allennlp.modules.seq2seq_encoders import PytorchSeq2SeqWrapper
 from torch.nn.functional import mse_loss
 from allennlp.nn.util import get_mask_from_sequence_lengths, masked_mean
@@ -16,8 +16,8 @@ from allennlp.nn.util import get_mask_from_sequence_lengths, masked_mean
 @Model.register("semantic_spaces_mapper")
 class SemanticSpacesMapper(Model):
     """
-    This class takes as input a sequence of contextualiuzed embeddings in source language
-    produced outside (e.g. by BERT) and maps it to the target sequence of contextualiuzed 
+    This class takes as input a sequence of contextualized embeddings in source language
+    produced outside (e.g. by BERT) and maps it to the target sequence of contextualized 
     embeddings.
 
     Basically it follows functionality of usual Seq2Seq decoder.
