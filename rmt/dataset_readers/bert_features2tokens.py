@@ -1,28 +1,25 @@
 from allennlp.data import DatasetReader
-from allennlp.data.fields import Field, ArrayField, MetadataField
+from allennlp.data.fields import Field, ArrayField, MetadataField, TextField
 from overrides import overrides
-from allennlp.data import Instance
+from allennlp.data import Instance, Token
+from allennlp.data.token_indexers import SingleIdTokenIndexer
 from allennlp.common.file_utils import cached_path
 import json
 import jsonlines
 from typing import List, Dict
 import numpy
 
-@DatasetReader.register("bert_features")
-class BertFeaturesDatasetReader(DatasetReader):
+@DatasetReader.register("bert_features2tokens")
+class BertFeatures2TokensDatasetReader(DatasetReader):
     def __init__(self,
                 lazy: bool = False) -> None:
         super().__init__(lazy)
     
     @overrides
     def _read(self, file_path: str):
-        src_feat_file = file_path + "src.jsonl"
         tgt_feat_file = file_path + "tgt.jsonl"
 
-        src_sentences, src_encoded_sentences = self._parse(src_feat_file)
         tgt_sentences, tgt_encoded_sentences = self._parse(tgt_feat_file)
-
-        assert len(src_sentences) == len(tgt_sentences)
 
         # for i, _ in enumerate(src_sentences):
         #     src = src_sentences[i]
@@ -31,9 +28,8 @@ class BertFeaturesDatasetReader(DatasetReader):
         #     encoded_tgt = tgt_encoded_sentences[i]
         #     yield self.text_to_instance(encoded_src, encoded_tgt, src, tgt)
 
-        for src, tgt, encoded_src, encoded_tgt in zip(src_sentences, tgt_sentences,
-                                                      src_encoded_sentences, tgt_encoded_sentences):
-            yield self.text_to_instance(encoded_src, encoded_tgt, src, tgt)
+        for tgt, encoded_tgt in zip(tgt_sentences, tgt_encoded_sentences):
+            yield self.text_to_instance(encoded_tgt, tgt)
 
 
     def _parse(self, file):
@@ -56,17 +52,14 @@ class BertFeaturesDatasetReader(DatasetReader):
         return sentences, encoded_sentences  
 
     @overrides
-    def text_to_instance(self,  # type: ignore
-                         source_vectors: numpy.ndarray, 
-                         target_vectors: numpy.ndarray = None,
-                         src: str = None,
-                         tgt: str = None,
-                         ):
+    def text_to_instance(self,  # type: ignore 
+                         target_vectors: numpy.ndarray,
+                         tgt: List[str] = None,
+                         use_tgt: bool = True):
         # pylint: disable=arguments-differ
         fields: Dict[str, Field] = {}
         
-        fields["source_vectors"] = ArrayField(array=source_vectors)
-        fields["src_strings"] = MetadataField(metadata=src)
         fields["target_vectors"] = ArrayField(array=target_vectors)
-        fields["tgt_strings"] = MetadataField(metadata=tgt)
+        if use_tgt:
+            fields["target_tokens"] = TextField([Token(t) for t in tgt], {"tokens": SingleIdTokenIndexer()})
         return Instance(fields)

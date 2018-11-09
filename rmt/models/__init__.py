@@ -1,1 +1,2 @@
 from rmt.models.semantic_spaces_mapper import SemanticSpacesMapper
+from rmt.models.semantic_space_decoder import SemanticSpaceDecoder

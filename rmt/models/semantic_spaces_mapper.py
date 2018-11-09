@@ -13,6 +13,8 @@ from allennlp.modules.seq2seq_encoders import PytorchSeq2SeqWrapper
 from torch.nn.functional import mse_loss
 from allennlp.nn.util import get_mask_from_sequence_lengths, masked_mean
 
+from rmt.modules.att_rnn_decoder import AttentionalRnnDecoder
+
 @Model.register("semantic_spaces_mapper")
 class SemanticSpacesMapper(Model):
     """
@@ -33,7 +35,7 @@ class SemanticSpacesMapper(Model):
     """
     def __init__(self, vocab: Vocabulary,
                  encoder: Seq2SeqEncoder,
-                 mapping_layer: Seq2SeqEncoder,
+                 mapping_layer: Seq2SeqEncoder, # AttentionalRnnDecoder actually
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
         super().__init__(vocab, regularizer)
