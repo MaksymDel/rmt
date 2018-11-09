@@ -1,6 +1,5 @@
 {
     "python.linting.pylintEnabled": true,
-    "python.linting.enabled": false,
     "python.unitTest.pyTestArgs": [
         "tests"
     ],
