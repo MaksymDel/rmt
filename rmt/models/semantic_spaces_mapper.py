@@ -14,6 +14,7 @@ from torch.nn.functional import mse_loss
 from allennlp.nn.util import get_mask_from_sequence_lengths, masked_mean
 
 from rmt.modules.att_rnn_decoder import AttentionalRnnDecoder
+from rmt.models.semantic_space_decoder import SemanticSpaceDecoder
 
 @Model.register("semantic_spaces_mapper")
 class SemanticSpacesMapper(Model):
@@ -36,10 +37,15 @@ class SemanticSpacesMapper(Model):
     def __init__(self, vocab: Vocabulary,
                  encoder: Seq2SeqEncoder,
                  mapping_layer: Seq2SeqEncoder, # AttentionalRnnDecoder actually
+                 path_to_semantic_space_decoder_model: str = None,
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
         super().__init__(vocab, regularizer)
         initializer(self)
+
+        if path_to_semantic_space_decoder_model is not None:
+            self._semantic_space_decoder: SemanticSpaceDecoder = None # model.from_archive(model_archive_path)
+            self._semantic_space_decoder.training = False
 
         assert encoder.get_output_dim() == mapping_layer.get_input_dim()
 
@@ -68,12 +74,28 @@ class SemanticSpacesMapper(Model):
         state = self._init_encoded_state(source_vectors, src_mask)
 
         # generate target embeddings
-        estimated_encoded_tgt = self._mapping_layer(state, target_vectors)
+        estimated_target_vectors = self._mapping_layer(state, target_vectors)
 
         # compute MSE loss wrt golden target embeddings
-        assert target_vectors.size() == estimated_encoded_tgt.size()
-        loss = mse_loss(estimated_encoded_tgt, target_vectors)
-        return {"loss": loss}
+        assert target_vectors.size() == estimated_target_vectors.size()
+        loss = mse_loss(estimated_target_vectors, target_vectors)
+        return {"loss": loss, "estimated_target_vectors": estimated_target_vectors}
+
+    @overrides
+    def decode(self, output_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        """
+        Finalize predictions.
+        This method overrides ``Model.decode``, which gets called after ``Model.forward``, at test
+        time, to finalize predictions. The logic for the decoder part of the encoder-decoder lives
+        within the ``forward`` method.
+        
+        This method passes predicted target vectors to target semantic space decoder model
+        which generate natural langauge from that.
+        """
+        output_dict = self._semantic_space_decoder(output_dict["estimated_target_vectors"])
+        output_dict = self._semantic_space_decoder.decode(output_dict)
+
+        return output_dict["predicted_tokens"]
 
     def _init_encoded_state(self, embedded_input: torch.Tensor, source_mask: torch.LongTensor) -> Dict[str, torch.Tensor]:
         """
