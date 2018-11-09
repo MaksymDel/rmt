@@ -9,5 +9,6 @@
     "python.pythonPath": "/home/maksym/anaconda3/envs/rmt/bin/python",
     "python.linting.mypyEnabled": true,
     "python.linting.lintOnSave": false,
-    "python.linting.maxNumberOfProblems": 5
+    "python.linting.maxNumberOfProblems": 5,
+    "python.linting.enabled": false
 }
