@@ -2,11 +2,9 @@ from typing import Dict, Optional, List
 
 from overrides import overrides
 import torch
-from torch.nn.modules.linear import Linear
 import numpy
 
 from allennlp.data import Vocabulary
-from allennlp.modules import TextFieldEmbedder
 from allennlp.models.model import Model
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
 from allennlp.nn import util
@@ -15,12 +13,6 @@ from allennlp.modules.seq2seq_encoders import PytorchSeq2SeqWrapper
 from torch.nn.functional import mse_loss
 from allennlp.nn.util import get_mask_from_sequence_lengths, masked_mean
 
-
-# TODO: better naming for everything in the codebase
-# encoded_target -> target_vectors
-# att_rnn_decoder -> att_rnn_vectors_decoder
-# allow bypass encoder in att_rnn_decoder where we just init decoder with avarage of BERT embeddings
-# etc 
 @Model.register("semantic_spaces_mapper")
 class SemanticSpacesMapper(Model):
     """
@@ -54,9 +46,9 @@ class SemanticSpacesMapper(Model):
 
     @overrides
     def forward(self,  # type: ignore
-                encoded_src: torch.Tensor,
+                source_vectors: torch.Tensor,
                 src_strings: List[str],
-                encoded_tgt: torch.Tensor = None,
+                target_vectors: torch.Tensor = None,
                 tgt_strings: List[str] = None) -> Dict[str, torch.Tensor]:
         # pylint: disable=arguments-differ
         """
@@ -68,17 +60,17 @@ class SemanticSpacesMapper(Model):
 
         """
         src_mask = self._get_mask_from_token_strings(src_strings)
-        tgt_mask = self._get_mask_from_token_strings(tgt_strings) 
+        # tgt_mask = self._get_mask_from_token_strings(tgt_strings) 
 
         # prepare source vectors for decoding
-        state = self._init_encoded_state(encoded_src, src_mask)
+        state = self._init_encoded_state(source_vectors, src_mask)
 
         # generate target embeddings
-        estimated_encoded_tgt = self._mapping_layer(state, encoded_tgt)
+        estimated_encoded_tgt = self._mapping_layer(state, target_vectors)
 
         # compute MSE loss wrt golden target embeddings
-        assert encoded_tgt.size() == estimated_encoded_tgt.size()
-        loss = mse_loss(estimated_encoded_tgt, encoded_tgt)
+        assert target_vectors.size() == estimated_encoded_tgt.size()
+        loss = mse_loss(estimated_encoded_tgt, target_vectors)
         return {"loss": loss}
 
     def _init_encoded_state(self, embedded_input: torch.Tensor, source_mask: torch.LongTensor) -> Dict[str, torch.Tensor]:

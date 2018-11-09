@@ -1,9 +1,7 @@
 from typing import Dict, List, Tuple
 
-import numpy
 from overrides import overrides
 import torch
-import torch.nn.functional as F
 from torch.nn.modules.linear import Linear
 from torch.nn.modules.rnn import LSTMCell
 
@@ -101,7 +99,7 @@ class AttentionalRnnDecoder(Seq2SeqEncoder):
 
     @overrides
     def forward(self, state: Dict[str, torch.Tensor],
-                      encoded_tgt: torch.FloatTensor = None) -> Dict[str, torch.Tensor]:
+                      target_vectors: torch.FloatTensor = None) -> Dict[str, torch.Tensor]:
         """
         Make foward pass with decoder logic for producing the entire target sequence of embeddings.
 
@@ -115,8 +113,8 @@ class AttentionalRnnDecoder(Seq2SeqEncoder):
         #batch_size = source_mask.size()[0]
         #encoded_tgt_dim = encoded_tgt.size()[2]
 
-        if encoded_tgt is not None:
-            _, target_sequence_length, _ = encoded_tgt.size()
+        if target_vectors is not None:
+            _, target_sequence_length, _ = target_vectors.size()
 
             # The last input from the target is either padding or the end symbol.
             # Either way, we don't have to process it.
@@ -131,7 +129,7 @@ class AttentionalRnnDecoder(Seq2SeqEncoder):
 
         # Append encoded BOS symbol to the output predictions becasuse we want the returnet 
         # sequence of embeddeddings to be in the same format as the input sequence
-        step_estimated_tgt_embeddings: List[torch.Tensor] = [last_predictions_encoded.unsqueeze(1)]
+        step_estimated_target_vectors: List[torch.Tensor] = [last_predictions_encoded.unsqueeze(1)]
 
         for timestep in range(num_decoding_steps):
             if self.training and torch.rand(1).item() < self._scheduled_sampling_ratio:
@@ -139,26 +137,26 @@ class AttentionalRnnDecoder(Seq2SeqEncoder):
                 # during training.
                 # shape: (batch_size,)
                 input_choices_encoded = last_predictions_encoded
-            elif encoded_tgt is None:
+            elif target_vectors is None:
                 # shape: (batch_size,)
                 input_choices_encoded = last_predictions_encoded
             else:
                 # shape: (batch_size,)
-                input_choices_encoded = encoded_tgt[:, timestep, :]
+                input_choices_encoded = target_vectors[:, timestep, :]
 
             # shape: (batch_size, encoded_tgt_dim)
             output_projections, state = self._prepare_output_projections(input_choices_encoded, state)
 
             # list of tensors, shape: (batch_size, 1, encoded_tgt_dim)
-            step_estimated_tgt_embeddings.append(output_projections.unsqueeze(1))
+            step_estimated_target_vectors.append(output_projections.unsqueeze(1))
 
             # shape: (batch_size, encoded_tgt_dim)
-            last_predictions_encoded = step_estimated_tgt_embeddings
+            last_predictions_encoded = step_estimated_target_vectors
 
         # shape: (batch_size, num_decoding_steps, num_classes)
-        estimated_tgt_embeddings = torch.cat(step_estimated_tgt_embeddings, 1)
+        estimated_target_vectors = torch.cat(step_estimated_target_vectors, 1)
 
-        return estimated_tgt_embeddings
+        return estimated_target_vectors
 
     def _prepare_output_projections(self,
                                     embedded_input: torch.FloatTensor,

@@ -10,5 +10,5 @@
 6) unzip multilingual_L-12_H-768_A-12.zip
 7) cd .. 
 8) bash ../scripts/extract_features_bert.sh
-9)
+9) wget https://download.pytorch.org/models/translate/iwslt14/data.tar.gz
 ```

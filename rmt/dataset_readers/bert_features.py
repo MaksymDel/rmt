@@ -57,15 +57,15 @@ class BertFeaturesDatasetReader(DatasetReader):
 
     @overrides
     def text_to_instance(self,  # type: ignore
-                         encoded_src: numpy.ndarray, 
-                         encoded_tgt: numpy.ndarray,
+                         source_vectors: numpy.ndarray, 
+                         target_vectors: numpy.ndarray,
                          src: str = None,
                          tgt: str = None):
         # pylint: disable=arguments-differ
         fields: Dict[str, Field] = {}
         
-        fields["encoded_src"] = ArrayField(array=encoded_src)
+        fields["source_vectors"] = ArrayField(array=source_vectors)
         fields["src_strings"] = MetadataField(metadata=src)
-        fields["encoded_tgt"] = ArrayField(array=encoded_tgt)
+        fields["target_vectors"] = ArrayField(array=target_vectors)
         fields["tgt_strings"] = MetadataField(metadata=tgt)
         return Instance(fields)
