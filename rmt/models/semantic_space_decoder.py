@@ -19,7 +19,9 @@ from allennlp.modules.token_embedders import Embedding
 from allennlp.nn import util
 from allennlp.nn.beam_search import BeamSearch
 
-
+# TODO: one way to deal with padding is to set padding value (in ArrayField) to some very small number, e.g. 1e-30
+# and then search for this kind of tensors (with all very low values) among predicted. Then compute mask based on them and proceed.
+# This way during training I can also mask encoder outputs based on tokens I try to decode. Or maybe I should not mask conceptually? Think it out. 
 @Model.register("semantic_space_decoder")
 class SemanticSpaceDecoder(Model):
     """
