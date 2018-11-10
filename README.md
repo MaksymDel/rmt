@@ -11,4 +11,8 @@
 7) cd .. 
 8) bash ../scripts/extract_features_bert.sh
 9) wget https://download.pytorch.org/models/translate/iwslt14/data.tar.gz
+10) allennlp train fixtures/semantic_space_decoder/experiment.json -s fixtures/semantic_space_decoder/serialization --include-package rmt -f
+11) allennlp train fixtures/semantic_spaces_mapper/experiment.json -s fixtures/semantic_spaces_mapper/serialization --include-package rmt -f
+12) allennlp predict fixtures/semantic_spaces_mapper/serialization/model.tar.gz fixtures/data/ --include-package rmt --predictor translator --use-dataset-reader -o "{"model":{"path_to_generator": 'fixtures/semantic_space_decoder/serialization/model.tar.gz'}}"
+
 ```

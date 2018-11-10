@@ -14,7 +14,7 @@
       "bidirectional": true
     },
     "max_decoding_steps": 20,
-    "target_embedding_dim": 30,
+    "target_embedding_dim": 768,
     "target_namespace": "tokens",
     "attention": {
       "type": "dot_product"
@@ -26,7 +26,7 @@
     "batch_size" : 2
   },
   "trainer": {
-    "num_epochs": 2,
+    "num_epochs": 3,
     "patience": 10,
     "cuda_device": -1,
     "optimizer": {

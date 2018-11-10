@@ -12,6 +12,8 @@ from allennlp.modules import Seq2SeqEncoder
 from allennlp.modules.seq2seq_encoders import PytorchSeq2SeqWrapper
 from torch.nn.functional import mse_loss
 from allennlp.nn.util import get_mask_from_sequence_lengths, masked_mean
+from allennlp.models.archival import load_archive, Archive
+from allennlp.common.checks import ConfigurationError
 
 from rmt.modules.att_rnn_decoder import AttentionalRnnDecoder
 from rmt.models.semantic_space_decoder import SemanticSpaceDecoder
@@ -37,20 +39,21 @@ class SemanticSpacesMapper(Model):
     def __init__(self, vocab: Vocabulary,
                  encoder: Seq2SeqEncoder,
                  mapping_layer: Seq2SeqEncoder, # AttentionalRnnDecoder actually
-                 path_to_semantic_space_decoder_model: str = None,
+                 path_to_generator: str = None,
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
         super().__init__(vocab, regularizer)
         initializer(self)
 
-        if path_to_semantic_space_decoder_model is not None:
-            self._semantic_space_decoder: SemanticSpaceDecoder = None # model.from_archive(model_archive_path)
-            self._semantic_space_decoder.training = False
-
         assert encoder.get_output_dim() == mapping_layer.get_input_dim()
 
         self._encoder = encoder # can be bypassed (use BypassEncoder) since input is already encoded with e.g. BERT
         self._mapping_layer = mapping_layer
+
+        self._semantic_space_decoder = None
+        # You should pass it as overrides argument at test time when using `allennlp predict` command
+        if path_to_generator is not None:
+            self._path_to_generator = path_to_generator
 
     @overrides
     def forward(self,  # type: ignore
@@ -81,6 +84,12 @@ class SemanticSpacesMapper(Model):
         loss = mse_loss(estimated_target_vectors, target_vectors)
         return {"loss": loss, "estimated_target_vectors": estimated_target_vectors}
 
+    def maybe_init_with_semantic_space_decoder(self):
+        if self._semantic_space_decoder is None:
+            if self._path_to_generator is None:
+                raise ConfigurationError("Your config should contain `path_to_generator` parameter to infer")         
+            self._semantic_space_decoder = load_archive(self._path_to_generator, self._get_prediction_device()).model
+
     @overrides
     def decode(self, output_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         """
@@ -92,10 +101,12 @@ class SemanticSpacesMapper(Model):
         This method passes predicted target vectors to target semantic space decoder model
         which generate natural langauge from that.
         """
+        self.maybe_init_with_semantic_space_decoder()
+        
         output_dict = self._semantic_space_decoder(output_dict["estimated_target_vectors"])
         output_dict = self._semantic_space_decoder.decode(output_dict)
 
-        return output_dict["predicted_tokens"]
+        return {"predicted_tokens": output_dict["predicted_tokens"]}
 
     def _init_encoded_state(self, embedded_input: torch.Tensor, source_mask: torch.LongTensor) -> Dict[str, torch.Tensor]:
         """

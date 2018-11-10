@@ -265,7 +265,7 @@ class SemanticSpaceDecoder(Model):
             num_decoding_steps = self._max_decoding_steps
 
         # shape: (batch_size,)
-        last_predictions = None
+        last_predictions = torch.tensor([-1] * batch_size) # stub
 
         step_logits: List[torch.Tensor] = []
         step_probabilities: List[torch.Tensor] = []
@@ -331,7 +331,7 @@ class SemanticSpaceDecoder(Model):
     def _forward_beam_search(self, state: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         """Make forward pass during prediction using a beam search."""
         batch_size = state["source_mask"].size()[0]
-        start_predictions = state["source_mask"].new_full((batch_size,), fill_value=self._start_index)
+        start_predictions = torch.tensor([-1] * batch_size) # stub
 
         # shape (all_top_k_predictions): (batch_size, beam_size, num_decoding_steps)
         # shape (log_probabilities): (batch_size, beam_size)
@@ -354,6 +354,7 @@ class SemanticSpaceDecoder(Model):
 
         Inputs are the same as for `take_step()`.
         """
+        batch_size = last_predictions.size()[0]
         # shape: (group_size, max_input_sequence_length, encoder_output_dim)
         encoder_outputs = state["encoder_outputs"]
 
@@ -367,7 +368,8 @@ class SemanticSpaceDecoder(Model):
         decoder_context = state["decoder_context"]
 
         # if first timestep and no teacher forcing
-        if last_predictions is None:
+        # TODO make stubbing better (same device, etc)
+        if torch.equal(last_predictions, torch.tensor([-1] * batch_size)):
             # shape: (group_size, target_embedding_dim)
             embedded_input = self._encoded_bos_symbol
         else:
