@@ -15,4 +15,8 @@
 11) allennlp train fixtures/semantic_spaces_mapper/experiment.json -s fixtures/semantic_spaces_mapper/serialization --include-package rmt -f
 12) allennlp predict fixtures/semantic_spaces_mapper/serialization/model.tar.gz fixtures/data/ --include-package rmt --predictor translator --use-dataset-reader -o "{"model":{"path_to_generator": 'fixtures/semantic_space_decoder/serialization/model.tar.gz'}}"
 
+
+a) allennlp train training_config/decoders/experiment.json -s output/decoders/serialization --include-package rmt -f
+b) allennlp train training_config/mappers/experiment.json -s output/mappers/serialization --include-package rmt -f
+c) allennlp predict output/mappers/serialization/model.tar.gz ../rmt-data/iwslt14-de-en/test/ --include-package rmt --predictor translator --use-dataset-reader -o "{"model":{"path_to_generator": 'output/decoders/serialization/model.tar.gz'}}"
 ```
