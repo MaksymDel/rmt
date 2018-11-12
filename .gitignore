@@ -26,3 +26,6 @@ data/
 
 # bert
 bert/
+
+# idea
+.idea

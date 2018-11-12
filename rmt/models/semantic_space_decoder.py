@@ -19,9 +19,14 @@ from allennlp.modules.token_embedders import Embedding
 from allennlp.nn import util
 from allennlp.nn.beam_search import BeamSearch
 
+from rmt.metrics import BLEU
+
+
 # TODO: one way to deal with padding is to set padding value (in ArrayField) to some very small number, e.g. 1e-30
-# and then search for this kind of tensors (with all very low values) among predicted. Then compute mask based on them and proceed.
-# This way during training I can also mask encoder outputs based on tokens I try to decode. Or maybe I should not mask conceptually? Think it out. 
+#  and then search for this kind of tensors (with all very low values) among predicted.
+# Then compute mask based on them and proceed.
+# This way during training I can also mask encoder outputs based on tokens I try to decode.
+# Or maybe I should not mask conceptually? Think it out.
 @Model.register("semantic_space_decoder")
 class SemanticSpaceDecoder(Model):
     """
@@ -130,6 +135,8 @@ class SemanticSpaceDecoder(Model):
             self._beam_search = BeamSearch(self._end_index, max_steps=max_decoding_steps, beam_size=beam_size)
         else:
             self._beam_search = None
+
+        self._bleu = BLEU()
 
     def take_step(self,
                   last_predictions: torch.Tensor,
@@ -326,9 +333,15 @@ class SemanticSpaceDecoder(Model):
             target_mask = util.get_text_field_mask(target_tokens)
             loss = self._get_loss(logits, targets, target_mask)
             output_dict["loss"] = loss
-            # TODO: Define metrics.
+
+            self._bleu(all_predictions, targets,
+                       (self._end_index, self.vocab.get_token_index("@pad@", namespace=self._target_namespace)))
 
         return output_dict
+
+    @overrides
+    def get_metrics(self, reset: bool = False):
+        return self._bleu.get_metric(reset)
 
     def _forward_beam_search(self, state: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         """Make forward pass during prediction using a beam search."""

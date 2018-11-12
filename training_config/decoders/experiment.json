@@ -1,0 +1,37 @@
+{
+  "dataset_reader": {
+    "type": "bert_features2tokens"
+  },
+  "train_data_path": "../rmt-data/iwslt14-de-en/train/",
+  "validation_data_path": "../rmt-data/iwslt14-de-en/train/",
+  "model": {
+    "type": "semantic_space_decoder",
+    "encoder": {
+      "type": "lstm",
+      "input_size": 768,
+      "hidden_size": 768 / 2,
+      "num_layers": 1,
+      "bidirectional": true
+    },
+    "max_decoding_steps": 128,
+    "target_embedding_dim": 768,
+    "target_namespace": "tokens",
+    "attention": {
+      "type": "dot_product"
+    },
+    "beam_size": 8
+  },
+  "iterator": {
+    "type": "basic",
+    "batch_size" : 64
+  },
+  "trainer": {
+    "num_epochs": 200,
+    "patience": 7,
+    "cuda_device": 0,
+    "optimizer": {
+      "type": "adam",
+      "lr": 0.01
+    }
+  }
+}

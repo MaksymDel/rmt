@@ -2,8 +2,8 @@
     "dataset_reader": {
       "type": "bert_features"
     },
-    "train_data_path": "fixtures/data/",
-    "validation_data_path": "fixtures/data/",
+    "train_data_path": "../rmt-data/iwslt14-de-en/train/",
+    "validation_data_path": "../rmt-data/iwslt14-de-en/train/",
     "model": {
       "type": "semantic_spaces_mapper",
     //   "mapping_layer": {
@@ -33,7 +33,7 @@
         "input_dim": 768,
         "decoder_rnn_output_dim": 768,
         "output_projection_dim": 768,
-        "max_decoding_steps": 20,
+        "max_decoding_steps": 128,
         "scheduled_sampling_ratio": 0,        
         "attention": {
           "type": "dot_product"
@@ -42,14 +42,14 @@
     },
     "iterator": {
       "type": "basic",
-      "batch_size" : 2
+      "batch_size" : 64
     },
     "trainer": {
-      "num_epochs": 3,
-      "patience": 10,
-      "cuda_device": -1,
+      "num_epochs": 200,
+      "patience": 7,
+      "cuda_device": 0,
       "optimizer": {
-        "type": "sgd",
+        "type": "adam",
         "lr": 0.01
       }
     }
