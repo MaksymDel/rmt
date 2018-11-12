@@ -18,6 +18,7 @@ from allennlp.models.model import Model
 from allennlp.modules.token_embedders import Embedding
 from allennlp.nn import util
 from allennlp.nn.beam_search import BeamSearch
+from allennlp.nn.util import masked_mean
 
 from rmt.metrics import BLEU
 
@@ -274,7 +275,7 @@ class SemanticSpaceDecoder(Model):
             num_decoding_steps = self._max_decoding_steps
 
         # shape: (batch_size,)
-        last_predictions = torch.tensor([-1] * batch_size) # stub
+        last_predictions = self._get_stub_tensor(batch_size, state["encoder_outputs"].device)  # stub
 
         step_logits: List[torch.Tensor] = []
         step_probabilities: List[torch.Tensor] = []
@@ -346,7 +347,7 @@ class SemanticSpaceDecoder(Model):
     def _forward_beam_search(self, state: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         """Make forward pass during prediction using a beam search."""
         batch_size = state["source_mask"].size()[0]
-        start_predictions = torch.tensor([-1] * batch_size) # stub
+        start_predictions = self._get_stub_tensor(batch_size, state["encoder_outputs"].device)  # stub
 
         # shape (all_top_k_predictions): (batch_size, beam_size, num_decoding_steps)
         # shape (log_probabilities): (batch_size, beam_size)
@@ -358,6 +359,9 @@ class SemanticSpaceDecoder(Model):
                 "predictions": all_top_k_predictions,
         }
         return output_dict
+
+    def _get_stub_tensor(self, batch_size, device):
+        return torch.tensor([-1] * batch_size).to(device)
 
     def _prepare_output_projections(self,
                                     last_predictions: torch.Tensor,
@@ -384,7 +388,7 @@ class SemanticSpaceDecoder(Model):
 
         # if first timestep and no teacher forcing
         # TODO make stubbing better (same device, etc)
-        if torch.equal(last_predictions, torch.tensor([-1] * batch_size)):
+        if torch.equal(last_predictions, self._get_stub_tensor(batch_size, last_predictions.device)):
             # shape: (group_size, target_embedding_dim)
             embedded_input = self._encoded_bos_symbol
         else:
