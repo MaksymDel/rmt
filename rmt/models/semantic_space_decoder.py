@@ -28,6 +28,10 @@ from rmt.metrics import BLEU
 # Then compute mask based on them and proceed.
 # This way during training I can also mask encoder outputs based on tokens I try to decode.
 # Or maybe I should not mask conceptually? Think it out.
+# TODO: abstract away decoders so that they are seq2seq_tokens_decoder and seq2seq_vectors_decoder inheriting
+# seq2seq_decoder. Seq2seq_decoder should take in input sequence, target sequence and return a sequence of
+# logits/vectors but not the loss. Loss should be computed by the outside's _model_ while seq2seq_decoders are _modules_
+
 @Model.register("semantic_space_decoder")
 class SemanticSpaceDecoder(Model):
     """
