@@ -12,44 +12,33 @@ import numpy
 @DatasetReader.register("bert_features2tokens")
 class BertFeatures2TokensDatasetReader(DatasetReader):
     def __init__(self,
-                lazy: bool = False) -> None:
+                lazy: bool = False, for_target_side: bool = True) -> None:
         super().__init__(lazy)
-    
+        self._for_target_side = for_target_side
+
     @overrides
     def _read(self, file_path: str):
-        tgt_feat_file = file_path + "tgt.jsonl"
 
-        tgt_sentences, tgt_encoded_sentences = self._parse(tgt_feat_file)
+        with open(cached_path(file_path)) as input_file:
+            for i, line in enumerate(input_file):
+                src, tgt = line.split("\t")
+                src, tgt = json.loads(src), json.loads(tgt)
+                if self._for_target_side:
+                    tgt_tokens, tgt_vectors = self._parse_bert_json(tgt)
+                    yield self.text_to_instance(tgt_vectors, tgt_tokens)
+                else:
+                    src_tokens, src_vectors = self._parse_bert_json(src)
+                    yield self.text_to_instance(src_vectors, src_tokens)
 
-        # for i, _ in enumerate(src_sentences):
-        #     src = src_sentences[i]
-        #     tgt = tgt_sentences[i]
-        #     encoded_src = src_encoded_sentences[i]
-        #     encoded_tgt = tgt_encoded_sentences[i]
-        #     yield self.text_to_instance(encoded_src, encoded_tgt, src, tgt)
-
-        for tgt, encoded_tgt in zip(tgt_sentences, tgt_encoded_sentences):
-            yield self.text_to_instance(encoded_tgt, tgt)
-
-
-    def _parse(self, file):
-        sentences = []      
-        encoded_sentences = []
-        with jsonlines.open(file) as encoded_sentences_dict:   
-            for sent in encoded_sentences_dict:
-                tokens_dicts = sent["features"]
-
-                sent_tokens = []
-                sent_features = []
-                for t in tokens_dicts:
-                    sent_tokens.append(t["token"])
-                    feat = t["layers"][0]["values"]
-                    feat = numpy.array([numpy.array(xi) for xi in feat])
-                    sent_features.append(feat)
-
-                sentences.append(sent_tokens)
-                encoded_sentences.append(numpy.array(sent_features))
-        return sentences, encoded_sentences  
+    def _parse_bert_json(self, jline):
+        tokens = []
+        vectors = []
+        for t_dict in jline['features']:
+            tokens.append(t_dict['token'])
+            vector = t_dict['layers'][0]['values']
+            vector = numpy.array([numpy.array(xi) for xi in vector])
+            vectors.append(vector)
+        return tokens, numpy.array(vectors)
 
     @overrides
     def text_to_instance(self,  # type: ignore 

@@ -12,6 +12,6 @@ class TestTranslator(AllenNlpTestCase):
         # archive = load_archive('fixtures/semantic_spaces_mapper/serialization/model.tar.gz', 
         #                     overrides="{'model': {'path_to_generator': 'fixtures/semantic_space_decoder/serialization/model.tar.gz'}}")
         
-        archive = load_archive('fixtures/semantic_spaces_mapper/serialization/model.tar.gz', overrides="{'model': {'path_to_generator': 'fixtures/semantic_space_decoder/serialization/model.tar.gz'}}")
-        a = 2+2
+        archive = load_archive('fixtures/semantic_spaces_mapper/serialization/model.tar.gz',
+                               overrides="{'model': {'path_to_generator': 'fixtures/semantic_space_decoder/serialization/model.tar.gz'}}")
         #predictor = Predictor.from_archive(archive, 'translator')
