@@ -1,4 +1,16 @@
-# Repository for Research in Regressional NMT by Mapping Pretrained Semantic Spaces
+# Repository for Research in Regressional NMT by Mapping Pretrained Semantic Spaces [Closed]
+
+
+The idea was to encode 2 languages with BERT. 
+Then learn 2 decoders for these languages (from bert embeddings).
+Lastly we could learn a mapping between bert feature spaces for 2 languages, and do translation this way.
+Mapping could be also learned in unsupervised way (e.g. with GANs) since embeddings are differentiable.
+
+Result: it was too hard task for decoder to decode from BERT embeddings into tokens (10 BLEU after 30 epochs of training.)
+Probably need to use more data/stronger model. 
+
+Alternatively one can learn to autoencoders and map their codes. 
+Very similar (same?) experiment is discussed here however: https://arxiv.org/abs/1706.04223
 
 ```
 0) create new conda env
