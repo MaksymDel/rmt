@@ -144,7 +144,7 @@ class SemanticSpacesMapper(Model):
                                                 source_mask,
                                                 self._encoder.is_bidirectional())
         else:
-            summary = masked_mean(encoder_outputs, source_mask.unsqueeze(-1), dim=1, keepdim=False)
+            summary = masked_mean(encoder_outputs, source_mask.unsqueeze(-1).to(encoder_outputs.device), dim=1, keepdim=False)
         return summary
 
     @staticmethod

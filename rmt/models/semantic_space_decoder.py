@@ -391,7 +391,6 @@ class SemanticSpaceDecoder(Model):
         decoder_context = state["decoder_context"]
 
         # if first timestep and no teacher forcing
-        # TODO make stubbing better (same device, etc)
         if torch.equal(last_predictions, self._get_stub_tensor(batch_size, last_predictions.device)):
             # shape: (group_size, target_embedding_dim)
             embedded_input = self._encoded_bos_symbol
@@ -401,7 +400,8 @@ class SemanticSpaceDecoder(Model):
 
         if self._attention:
             # shape: (group_size, encoder_output_dim)
-            attended_input = self._prepare_attended_input(decoder_hidden, encoder_outputs, source_mask)
+            attended_input = self._prepare_attended_input(decoder_hidden, encoder_outputs,
+                                                          source_mask.to(encoder_outputs.device))
 
             # shape: (group_size, decoder_output_dim + target_embedding_dim)
             decoder_input = torch.cat((attended_input, embedded_input), -1)
@@ -517,5 +517,6 @@ class SemanticSpaceDecoder(Model):
                                                 source_mask,
                                                 self._encoder.is_bidirectional())
         else:
-            summary = masked_mean(encoder_outputs, source_mask.unsqueeze(-1), dim=1, keepdim=False)
+            summary = masked_mean(encoder_outputs, source_mask.unsqueeze(-1).to(encoder_outputs.device), dim=1,
+                                  keepdim=False)
         return summary

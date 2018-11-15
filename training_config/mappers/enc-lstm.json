@@ -1,0 +1,57 @@
+{
+    "dataset_reader": {
+      "type": "bert_features",
+      "lazy": false
+
+    },
+    "train_data_path": "../rmt-data/iwslt14-de-en/train/both.jsonl",
+    "validation_data_path": "../rmt-data/iwslt14-de-en/valid/both.jsonl",
+    "model": {
+      "type": "semantic_spaces_mapper",
+    //   "mapping_layer": {
+    //       "type": "time_distributed_ff",
+    //       "feed_forward": {
+    //         "input_dim": 768,
+    //         "num_layers": 2,
+    //         "hidden_dims": [768, 768],
+    //         "activations": ["relu", "linear"],
+    //         "dropout": [0.1, 0.0]
+    //       }
+    //   }
+       "encoder": {
+           "type": "lstm",
+           "bidirectional": true,
+           "hidden_size": 768 / 2,
+           "input_size": 768,
+           "num_layers": 1
+       },
+//      "encoder": {
+//        "type": "pass_through",
+//        "input_dim": 768
+//      },
+      "mapping_layer": {
+        "type": "att_rnn_decoder",
+        "input_dim": 768,
+        "decoder_rnn_output_dim": 768,
+        "output_projection_dim": 768,
+        "max_decoding_steps": 128,
+        "scheduled_sampling_ratio": 0,        
+        "attention": {
+          "type": "dot_product"
+        }
+      }
+    },
+    "iterator": {
+      "type": "basic",
+      "batch_size" : 32
+    },
+    "trainer": {
+      "num_epochs": 200,
+      "patience": 7,
+      "cuda_device": 0,
+      "optimizer": {
+        "type": "adam",
+        "lr": 0.01
+      }
+    }
+  }

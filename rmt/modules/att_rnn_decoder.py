@@ -211,7 +211,7 @@ class AttentionalRnnDecoder(Seq2SeqEncoder):
 
         # shape: (batch_size, max_input_sequence_length)
         input_weights = self._attention(
-                decoder_hidden_state, encoder_outputs, encoder_outputs_mask)
+                decoder_hidden_state, encoder_outputs, encoder_outputs_mask.to(encoder_outputs.device))
 
         # shape: (batch_size, encoder_output_dim)
         attended_input = util.weighted_sum(encoder_outputs, input_weights)
